@@ -6,17 +6,17 @@ import java.util.List;
 import java.util.Optional;
 
 public interface UserRepository {
-
-    List<User> findAll();
-
     User save(User user);
-
-    Optional<User> findById(Long id);
 
     User update(User user);
 
-    void delete(Long id);
+    Optional<User> findById(Long id);
 
-    boolean emailExists(String email);
+    List<User> findAll();
 
+    void deleteById(Long id);
+
+    boolean existsByEmail(String email);
+
+    boolean existsByEmailAndIdNot(String email, Long id);
 }

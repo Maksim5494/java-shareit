@@ -11,13 +11,14 @@ public class UserRepositoryImpl implements UserRepository {
     private Long idCounter = 1L;
 
     @Override
-    public List<User> findAll() {
-        return new ArrayList<>(users.values());
+    public User save(User user) {
+        user.setId(idCounter++);
+        users.put(user.getId(), user);
+        return user;
     }
 
     @Override
-    public User save(User user) {
-        user.setId(idCounter++);
+    public User update(User user) {
         users.put(user.getId(), user);
         return user;
     }
@@ -28,19 +29,24 @@ public class UserRepositoryImpl implements UserRepository {
     }
 
     @Override
-    public User update(User user) {
-        users.put(user.getId(), user);
-        return user;
+    public List<User> findAll() {
+        return new ArrayList<>(users.values());
     }
 
     @Override
-    public void delete(Long id) {
+    public void deleteById(Long id) {
         users.remove(id);
     }
 
     @Override
-    public boolean emailExists(String email) {
+    public boolean existsByEmail(String email) {
         return users.values().stream()
-                .anyMatch(u -> u.getEmail().equalsIgnoreCase(email));
+                .anyMatch(user -> user.getEmail().equalsIgnoreCase(email));
+    }
+
+    @Override
+    public boolean existsByEmailAndIdNot(String email, Long id) {
+        return users.values().stream()
+                .anyMatch(user -> user.getEmail().equalsIgnoreCase(email) && !user.getId().equals(id));
     }
 }
