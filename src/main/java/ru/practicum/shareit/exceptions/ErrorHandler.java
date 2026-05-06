@@ -1,30 +1,42 @@
 package ru.practicum.shareit.exceptions;
 
-import io.micrometer.core.instrument.config.validate.ValidationException;
-import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingRequestHeaderException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+
+import java.util.Map;
 
 @RestControllerAdvice
 public class ErrorHandler {
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ErrorResponse handleNotFound(final ChangeSetPersister.NotFoundException e) {
-        return new ErrorResponse(e.getMessage());
+    public Map<String, String> handleNotFound(final NotFoundException e) {
+        return Map.of("error", e.getMessage());
     }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.CONFLICT)
-    public ErrorResponse handleConflict(final ConflictException e) {
-        return new ErrorResponse(e.getMessage());
+    public Map<String, String> handleConflict(final ConflictException e) {
+        return Map.of("error", e.getMessage());
+    }
+
+    @ExceptionHandler({
+            MethodArgumentNotValidException.class,
+            IllegalArgumentException.class,
+            MissingRequestHeaderException.class
+    })
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public Map<String, String> handleBadRequest(final Exception e) {
+        return Map.of("error", e.getMessage());
     }
 
     @ExceptionHandler
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handleValidation(final ValidationException e) {
-        return new ErrorResponse(e.getMessage());
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public Map<String, String> handleOther(final Throwable e) {
+        return Map.of("error", e.getMessage());
     }
 }

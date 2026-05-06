@@ -21,12 +21,14 @@ public class ItemService {
         userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("User not found"));
 
-        Item item = itemMapper.toItem(itemDto);
-        item.setOwnerId(userId);
+        Item item = itemMapper.toItem(itemDto, userId);
         return itemMapper.toDto(itemRepository.save(item));
     }
 
     public ItemDto update(Long userId, Long itemId, ItemDto itemDto) {
+        userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException("User not found"));
+
         Item item = itemRepository.findById(itemId)
                 .orElseThrow(() -> new NotFoundException("Item not found"));
 
@@ -43,27 +45,32 @@ public class ItemService {
         if (itemDto.getAvailable() != null) {
             item.setAvailable(itemDto.getAvailable());
         }
-        if (itemDto.getRequestId() != null) {
-            item.setRequestId(itemDto.getRequestId());
-        }
 
-        return itemMapper.toDto(itemRepository.update(item));
+        itemRepository.update(item);
+        return itemMapper.toDto(item);
     }
 
     public ItemDto getById(Long itemId) {
-        return itemRepository.findById(itemId)
-                .map(itemMapper::toDto)
+        Item item = itemRepository.findById(itemId)
                 .orElseThrow(() -> new NotFoundException("Item not found"));
+        return itemMapper.toDto(item);
     }
 
-    public List<ItemDto> getAllByOwnerId(Long userId) {
-        return itemRepository.findByOwnerId(userId).stream()
+    public List<ItemDto> getAllByOwner(Long userId) {
+        userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException("User not found"));
+
+        return itemRepository.findAllByOwnerId(userId).stream()
                 .map(itemMapper::toDto)
                 .collect(Collectors.toList());
     }
 
     public List<ItemDto> search(String text) {
-        return itemRepository.search(text).stream()
+        if (text == null || text.isBlank()) {
+            return List.of();
+        }
+
+        return itemRepository.searchAvailableByText(text).stream()
                 .map(itemMapper::toDto)
                 .collect(Collectors.toList());
     }

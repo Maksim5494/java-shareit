@@ -39,7 +39,8 @@ public class UserService {
             user.setEmail(userDto.getEmail());
         }
 
-        return userMapper.toDto(userRepository.update(user));
+        userRepository.update(user);
+        return userMapper.toDto(user);
     }
 
     public UserDto getById(Long userId) {

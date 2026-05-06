@@ -47,6 +47,7 @@ public class UserRepositoryImpl implements UserRepository {
     @Override
     public boolean existsByEmailAndIdNot(String email, Long id) {
         return users.values().stream()
-                .anyMatch(user -> user.getEmail().equalsIgnoreCase(email) && !user.getId().equals(id));
+                .anyMatch(user -> user.getEmail().equalsIgnoreCase(email)
+                        && !user.getId().equals(id));
     }
 }

@@ -11,30 +11,30 @@ import java.util.List;
 @RequestMapping("/items")
 @RequiredArgsConstructor
 public class ItemController {
-
+    private static final String USER_HEADER = "X-Sharer-User-Id";
     private final ItemService itemService;
 
     @PostMapping
-    public ItemDto create(@RequestHeader("X-Sharer-User-Id") Long userId,
+    public ItemDto create(@RequestHeader(USER_HEADER) Long userId,
                           @Valid @RequestBody ItemDto itemDto) {
         return itemService.create(userId, itemDto);
     }
 
     @PatchMapping("/{itemId}")
-    public ItemDto update(@RequestHeader("X-Sharer-User-Id") Long userId,
-                          @RequestBody ItemDto itemDto,
-                          @PathVariable Long itemId) {
+    public ItemDto update(@RequestHeader(USER_HEADER) Long userId,
+                          @PathVariable Long itemId,
+                          @RequestBody ItemDto itemDto) {
         return itemService.update(userId, itemId, itemDto);
     }
 
     @GetMapping("/{itemId}")
-    public ItemDto getItem(@PathVariable Long itemId) {
+    public ItemDto getById(@PathVariable Long itemId) {
         return itemService.getById(itemId);
     }
 
     @GetMapping
-    public List<ItemDto> getAllItemsByUserId(@RequestHeader("X-Sharer-User-Id") Long userId) {
-        return itemService.getAllByOwnerId(userId);
+    public List<ItemDto> getAllByOwner(@RequestHeader(USER_HEADER) Long userId) {
+        return itemService.getAllByOwner(userId);
     }
 
     @GetMapping("/search")
