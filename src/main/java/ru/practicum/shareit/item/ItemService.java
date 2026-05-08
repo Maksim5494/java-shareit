@@ -26,28 +26,18 @@ public class ItemService {
     }
 
     public ItemDto update(Long userId, Long itemId, ItemDto itemDto) {
-        userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException("User not found"));
-
         Item item = itemRepository.findById(itemId)
-                .orElseThrow(() -> new NotFoundException("Item not found"));
+                .orElseThrow(() -> new NotFoundException("Вещь не найдена"));
 
         if (!item.getOwnerId().equals(userId)) {
-            throw new NotFoundException("Item not found");
+            throw new NotFoundException("Редактировать может только владелец");
         }
 
-        if (itemDto.getName() != null) {
-            item.setName(itemDto.getName());
-        }
-        if (itemDto.getDescription() != null) {
-            item.setDescription(itemDto.getDescription());
-        }
-        if (itemDto.getAvailable() != null) {
-            item.setAvailable(itemDto.getAvailable());
-        }
+        if (itemDto.getName() != null && !itemDto.getName().isBlank()) item.setName(itemDto.getName());
+        if (itemDto.getDescription() != null && !itemDto.getDescription().isBlank()) item.setDescription(itemDto.getDescription());
+        if (itemDto.getAvailable() != null) item.setAvailable(itemDto.getAvailable());
 
-        itemRepository.update(item);
-        return itemMapper.toDto(item);
+        return itemMapper.toDto(itemRepository.update(item));
     }
 
     public ItemDto getById(Long itemId) {

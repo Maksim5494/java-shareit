@@ -39,14 +39,19 @@ public class ItemRepositoryImpl implements ItemRepository {
 
     @Override
     public List<Item> searchAvailableByText(String text) {
+        if (text == null || text.isBlank()) {
+            return Collections.emptyList();
+        }
+
         String lowerText = text.toLowerCase();
 
         return items.values().stream()
                 .filter(item -> Boolean.TRUE.equals(item.getAvailable()))
-                .filter(item ->
-                        item.getName().toLowerCase().contains(lowerText) ||
-                                item.getDescription().toLowerCase().contains(lowerText))
-                .sorted(Comparator.comparing(Item::getId))
+                .filter(item -> {
+                    String name = item.getName() != null ? item.getName().toLowerCase() : "";
+                    String description = item.getDescription() != null ? item.getDescription().toLowerCase() : "";
+                    return name.contains(lowerText) || description.contains(lowerText);
+                })
                 .collect(Collectors.toList());
     }
 }
