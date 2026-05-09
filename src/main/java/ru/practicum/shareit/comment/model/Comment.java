@@ -1,9 +1,7 @@
 package ru.practicum.shareit.comment.model;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.model.User;
 
@@ -13,7 +11,9 @@ import java.time.LocalDateTime;
 @Table(name = "comments")
 @Getter
 @Setter
+@Builder
 @NoArgsConstructor
+@AllArgsConstructor
 public class Comment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -27,7 +27,7 @@ public class Comment {
     private Item item;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false) // Было author_id, в схеме user_id
+    @JoinColumn(name = "author_id", nullable = false)
     private User author;
 
     @Column(name = "created", nullable = false)
