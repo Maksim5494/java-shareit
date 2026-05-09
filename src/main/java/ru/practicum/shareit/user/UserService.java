@@ -39,7 +39,7 @@ public class UserService {
             user.setEmail(userDto.getEmail());
         }
 
-        userRepository.update(user);
+        userRepository.save(user);
         return userMapper.toDto(user);
     }
 
