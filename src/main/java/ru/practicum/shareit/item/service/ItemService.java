@@ -27,27 +27,25 @@ public class ItemService {
     @Transactional
     public ItemDto create(Long userId, ItemDto itemDto) {
         User owner = userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException("User not found with id: " + userId));
-
+                .orElseThrow(() -> new NotFoundException("Пользователь не найден"));
         Item item = itemMapper.toEntity(itemDto);
         item.setOwner(owner);
-
         return itemMapper.toDto(itemRepository.save(item));
     }
 
     @Transactional
     public ItemDto update(Long userId, Long itemId, ItemDto itemDto) {
         Item item = itemRepository.findById(itemId)
-                .orElseThrow(() -> new NotFoundException("Item not found with id: " + itemId));
+                .orElseThrow(() -> new NotFoundException("Вещь не найдена"));
 
         if (!item.getOwner().getId().equals(userId)) {
-            throw new NotFoundException("Item not found with id: " + itemId);
+            throw new NotFoundException("Редактировать вещь может только её владелец");
         }
 
-        if (itemDto.getName() != null) {
+        if (itemDto.getName() != null && !itemDto.getName().isBlank()) {
             item.setName(itemDto.getName());
         }
-        if (itemDto.getDescription() != null) {
+        if (itemDto.getDescription() != null && !itemDto.getDescription().isBlank()) {
             item.setDescription(itemDto.getDescription());
         }
         if (itemDto.getAvailable() != null) {
@@ -59,14 +57,11 @@ public class ItemService {
 
     public ItemDto getById(Long itemId) {
         Item item = itemRepository.findById(itemId)
-                .orElseThrow(() -> new NotFoundException("Item not found with id: " + itemId));
+                .orElseThrow(() -> new NotFoundException("Вещь не найдена"));
         return itemMapper.toDto(item);
     }
 
     public List<ItemDto> getAllByOwner(Long userId) {
-        if (!userRepository.existsById(userId)) {
-            throw new NotFoundException("User not found");
-        }
         return itemRepository.findAllByOwner_Id(userId).stream()
                 .map(itemMapper::toDto)
                 .collect(Collectors.toList());

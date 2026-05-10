@@ -43,7 +43,7 @@ public class BookingService {
         Item item = itemRepository.findById(bookingDto.getItemId())
                 .orElseThrow(() -> new NotFoundException("Вещь не найдена"));
 
-        if (!item.getAvailable()) {
+        if (!Boolean.TRUE.equals(item.getAvailable())) {
             throw new ValidationException("Вещь недоступна для бронирования");
         }
 

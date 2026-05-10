@@ -22,5 +22,5 @@ public class ItemRequestDto {
 
     private LocalDateTime created;
 
-    private List<ItemDto> items; // Список вещей, которые были предложены в ответ на запрос
+    private List<ItemDto> items;
 }
