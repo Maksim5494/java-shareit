@@ -41,13 +41,13 @@ public class ItemService {
                 .orElseThrow(() -> new NotFoundException("Item not found with id: " + itemId));
 
         if (!item.getOwner().getId().equals(userId)) {
-            throw new NotFoundException("Item belongs to another user");
+            throw new NotFoundException("Item not found with id: " + itemId);
         }
 
-        if (itemDto.getName() != null && !itemDto.getName().isBlank()) {
+        if (itemDto.getName() != null) {
             item.setName(itemDto.getName());
         }
-        if (itemDto.getDescription() != null && !itemDto.getDescription().isBlank()) {
+        if (itemDto.getDescription() != null) {
             item.setDescription(itemDto.getDescription());
         }
         if (itemDto.getAvailable() != null) {

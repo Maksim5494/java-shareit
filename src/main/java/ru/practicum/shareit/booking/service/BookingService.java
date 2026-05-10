@@ -29,11 +29,11 @@ public class BookingService {
 
     @Transactional
     public BookingDto create(Long userId, BookingDto bookingDto) {
-
-        if (bookingDto.getStart() == null || bookingDto.getEnd() == null ||
-                bookingDto.getStart().isAfter(bookingDto.getEnd()) ||
-                bookingDto.getStart().isEqual(bookingDto.getEnd()) ||
-                bookingDto.getStart().isBefore(LocalDateTime.now())) {
+        if (bookingDto.getItemId() == null
+                || bookingDto.getStart() == null
+                || bookingDto.getEnd() == null
+                || !bookingDto.getStart().isAfter(LocalDateTime.now())
+                || !bookingDto.getEnd().isAfter(bookingDto.getStart())) {
             throw new ValidationException("Некорректные даты бронирования");
         }
 
