@@ -11,16 +11,18 @@ public class ItemDto {
 
     private Long id;
 
-    @NotBlank
+    @NotBlank(groups = Create.class)
     private String name;
 
-    @NotBlank
+    @NotBlank(groups = Create.class)
     private String description;
 
-    @NotNull
+    @NotNull(groups = Create.class)
     private Boolean available;
 
     private Long requestId;
 
     private Long ownerId;
+
+    public interface Create {}
 }

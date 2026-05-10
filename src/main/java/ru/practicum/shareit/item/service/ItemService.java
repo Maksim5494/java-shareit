@@ -40,12 +40,10 @@ public class ItemService {
         Item item = itemRepository.findById(itemId)
                 .orElseThrow(() -> new NotFoundException("Item not found with id: " + itemId));
 
-        // Проверка: только владелец может обновлять вещь
         if (!item.getOwner().getId().equals(userId)) {
             throw new NotFoundException("Item belongs to another user");
         }
 
-        // Частичное обновление полей
         if (itemDto.getName() != null && !itemDto.getName().isBlank()) {
             item.setName(itemDto.getName());
         }
@@ -66,7 +64,6 @@ public class ItemService {
     }
 
     public List<ItemDto> getAllByOwner(Long userId) {
-        // Проверяем существование пользователя, чтобы вернуть 404 если его нет
         if (!userRepository.existsById(userId)) {
             throw new NotFoundException("User not found");
         }

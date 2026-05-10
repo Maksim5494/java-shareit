@@ -29,6 +29,14 @@ public class BookingService {
 
     @Transactional
     public BookingDto create(Long userId, BookingDto bookingDto) {
+
+        if (bookingDto.getStart() == null || bookingDto.getEnd() == null ||
+                bookingDto.getStart().isAfter(bookingDto.getEnd()) ||
+                bookingDto.getStart().isEqual(bookingDto.getEnd()) ||
+                bookingDto.getStart().isBefore(LocalDateTime.now())) {
+            throw new ValidationException("Некорректные даты бронирования");
+        }
+
         User booker = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("Пользователь не найден"));
 
