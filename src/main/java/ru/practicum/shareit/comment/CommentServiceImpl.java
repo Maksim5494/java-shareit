@@ -6,6 +6,7 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.model.BookingStatus;
 import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.exceptions.NotFoundException;
+import ru.practicum.shareit.exceptions.ValidationException;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.user.model.User;
@@ -26,15 +27,23 @@ public class CommentServiceImpl implements CommentService {
     @Override
     @Transactional
     public CommentDto create(Long userId, Long itemId, String text) {
+
+        if (text == null || text.isBlank()) {
+            throw new ValidationException("Текст комментария не может быть пустым");
+        }
+
         User author = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("Пользователь не найден"));
 
         Item item = itemRepository.findById(itemId)
                 .orElseThrow(() -> new NotFoundException("Вещь не найдена"));
 
-        bookingRepository.findFirstByItem_IdAndBooker_IdAndEndBeforeAndStatus(
-                        itemId, userId, LocalDateTime.now(), BookingStatus.APPROVED)
-                .orElseThrow(() -> new IllegalArgumentException("Вы не можете оставить отзыв: аренда не завершена или не существует"));
+        boolean exists = bookingRepository.existsByItem_IdAndBooker_IdAndStatusAndEndBefore(
+                itemId, userId, BookingStatus.APPROVED, LocalDateTime.now());
+
+        if (!exists) {
+            throw new ValidationException("Вы не можете оставить отзыв: аренда не завершена или не существует");
+        }
 
         Comment comment = Comment.builder()
                 .text(text)

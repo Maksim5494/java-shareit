@@ -44,7 +44,7 @@ public class BookingServiceImpl implements BookingService {
         Item item = itemRepository.findById(bookingDto.getItemId())
                 .orElseThrow(() -> new NotFoundException("Вещь не найдена"));
 
-        if (!Boolean.TRUE.equals(item.getAvailable())) {
+        if (Boolean.FALSE.equals(item.getAvailable())) {
             throw new ValidationException("Вещь недоступна для бронирования");
         }
 
@@ -69,7 +69,7 @@ public class BookingServiceImpl implements BookingService {
                 .orElseThrow(() -> new NotFoundException("Бронирование не найдено"));
 
         if (!booking.getItem().getOwner().getId().equals(userId)) {
-            throw new ValidationException("Только владелец вещи может подтверждать бронирование");
+            throw new NotFoundException("Бронирование не найдено");
         }
 
         if (booking.getStatus() != BookingStatus.WAITING) {
@@ -97,9 +97,36 @@ public class BookingServiceImpl implements BookingService {
         userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("Пользователь не найден"));
 
-        return bookingRepository.findAll().stream()
-                .map(BookingMapper::toDto)
-                .toList();
+        List<Booking> bookings;
+        LocalDateTime now = LocalDateTime.now();
+
+        switch (state.toUpperCase()) {
+            case "ALL":
+                bookings = bookingRepository.findAllByBooker_IdOrderByStartDesc(userId);
+                break;
+            case "CURRENT":
+                bookings = bookingRepository.findAllByBooker_IdAndStartBeforeAndEndAfterOrderByStartDesc(userId, now, now);
+                break;
+            case "PAST":
+                bookings = bookingRepository.findAllByBooker_IdAndEndBeforeOrderByStartDesc(userId, now);
+                break;
+            case "FUTURE":
+                bookings = bookingRepository.findAllByBooker_IdAndStartAfterOrderByStartDesc(userId, now);
+                break;
+            case "WAITING":
+                bookings = bookingRepository.findAllByBooker_IdAndStatusOrderByStartDesc(userId, BookingStatus.WAITING);
+                break;
+            case "REJECTED":
+                bookings = bookingRepository.findAllByBooker_IdAndStatusOrderByStartDesc(userId, BookingStatus.REJECTED);
+                break;
+            case "APPROVED":
+                bookings = bookingRepository.findAllByBooker_IdAndStatusOrderByStartDesc(userId, BookingStatus.APPROVED);
+                break;
+            default:
+                throw new ValidationException("Неверный state");
+        }
+
+        return bookings.stream().map(BookingMapper::toDto).toList();
     }
 
     @Override
@@ -107,8 +134,35 @@ public class BookingServiceImpl implements BookingService {
         userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("Пользователь не найден"));
 
-        return bookingRepository.findAll().stream()
-                .map(BookingMapper::toDto)
-                .toList();
+        LocalDateTime now = LocalDateTime.now();
+        List<Booking> bookings;
+
+        switch (state.toUpperCase()) {
+            case "ALL":
+                bookings = bookingRepository.findAllByItemOwnerIdOrderByStartDesc(userId);
+                break;
+            case "CURRENT":
+                bookings = bookingRepository.findAllByItem_Owner_IdAndStartBeforeAndEndAfterOrderByStartDesc(userId, now, now);
+                break;
+            case "PAST":
+                bookings = bookingRepository.findAllByItem_Owner_IdAndEndBeforeOrderByStartDesc(userId, now);
+                break;
+            case "FUTURE":
+                bookings = bookingRepository.findAllByItem_Owner_IdAndStartAfterOrderByStartDesc(userId, now);
+                break;
+            case "WAITING":
+                bookings = bookingRepository.findAllByItem_Owner_IdAndStatusOrderByStartDesc(userId, BookingStatus.WAITING);
+                break;
+            case "REJECTED":
+                bookings = bookingRepository.findAllByItem_Owner_IdAndStatusOrderByStartDesc(userId, BookingStatus.REJECTED);
+                break;
+            case "APPROVED":
+                bookings = bookingRepository.findAllByItem_Owner_IdAndStatusOrderByStartDesc(userId, BookingStatus.APPROVED);
+                break;
+            default:
+                throw new ValidationException("Неверный state");
+        }
+
+        return bookings.stream().map(BookingMapper::toDto).toList();
     }
 }

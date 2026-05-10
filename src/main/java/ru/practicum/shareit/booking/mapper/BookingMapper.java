@@ -12,11 +12,11 @@ public class BookingMapper {
                 .start(booking.getStart())
                 .end(booking.getEnd())
                 .itemId(booking.getItem() != null ? booking.getItem().getId() : null)
-                .booker(UserDto.builder()
+                .booker(booking.getBooker() != null ? UserDto.builder()
                         .id(booking.getBooker().getId())
                         .name(booking.getBooker().getName())
                         .email(booking.getBooker().getEmail())
-                        .build())
+                        .build() : null)
                 .status(booking.getStatus())
                 .build();
     }
