@@ -17,11 +17,11 @@ public class BookingMapper {
     }
 
     public static Booking toEntity(BookingDto dto) {
-        Booking booking = new Booking();
-        booking.setId(dto.getId());
-        booking.setStart(dto.getStart());
-        booking.setEnd(dto.getEnd());
-        booking.setStatus(dto.getStatus());
-        return booking;
+        return Booking.builder()
+                .id(dto.getId())
+                .start(dto.getStart())
+                .end(dto.getEnd())
+                .status(dto.getStatus())
+                .build();
     }
 }
