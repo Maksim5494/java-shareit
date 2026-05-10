@@ -7,9 +7,13 @@ import ru.practicum.shareit.item.model.Item;
 
 import java.util.List;
 
+// ItemRepository.java
 public interface ItemRepository extends JpaRepository<Item, Long> {
 
     List<Item> findAllByOwner_Id(Long ownerId);
+
+    // Добавьте этот метод
+    List<Item> findAllByRequestId(Long requestId);
 
     @Query("""
         select i from Item i
@@ -19,7 +23,5 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
             or lower(i.description) like lower(concat('%', :text, '%'))
         )
         """)
-
     List<Item> searchAvailableByText(@Param("text") String text);
-
 }
