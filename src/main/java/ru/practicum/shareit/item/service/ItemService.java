@@ -11,6 +11,7 @@ import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -37,12 +38,14 @@ public class ItemService {
     @Transactional
     public ItemDto update(Long userId, Long itemId, ItemDto itemDto) {
         Item item = itemRepository.findById(itemId)
-                .orElseThrow(() -> new NotFoundException("Item not found"));
+                .orElseThrow(() -> new NotFoundException("Item not found with id: " + itemId));
 
+        // Проверка: только владелец может обновлять вещь
         if (!item.getOwner().getId().equals(userId)) {
-            throw new NotFoundException("User is not the owner of this item");
+            throw new NotFoundException("Item belongs to another user");
         }
 
+        // Частичное обновление полей
         if (itemDto.getName() != null && !itemDto.getName().isBlank()) {
             item.setName(itemDto.getName());
         }
@@ -57,12 +60,16 @@ public class ItemService {
     }
 
     public ItemDto getById(Long itemId) {
-        return itemRepository.findById(itemId)
-                .map(itemMapper::toDto)
-                .orElseThrow(() -> new NotFoundException("Item not found"));
+        Item item = itemRepository.findById(itemId)
+                .orElseThrow(() -> new NotFoundException("Item not found with id: " + itemId));
+        return itemMapper.toDto(item);
     }
 
     public List<ItemDto> getAllByOwner(Long userId) {
+        // Проверяем существование пользователя, чтобы вернуть 404 если его нет
+        if (!userRepository.existsById(userId)) {
+            throw new NotFoundException("User not found");
+        }
         return itemRepository.findAllByOwner_Id(userId).stream()
                 .map(itemMapper::toDto)
                 .collect(Collectors.toList());
@@ -70,7 +77,7 @@ public class ItemService {
 
     public List<ItemDto> search(String text) {
         if (text == null || text.isBlank()) {
-            return List.of();
+            return Collections.emptyList();
         }
         return itemRepository.searchAvailableByText(text).stream()
                 .map(itemMapper::toDto)
