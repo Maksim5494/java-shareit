@@ -2,16 +2,13 @@ package ru.practicum.shareit.item.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 @Data
 @Builder
-@AllArgsConstructor
-@NoArgsConstructor
 public class ItemDto {
+
     private Long id;
 
     @NotBlank
@@ -24,4 +21,6 @@ public class ItemDto {
     private Boolean available;
 
     private Long requestId;
+
+    private Long ownerId;
 }

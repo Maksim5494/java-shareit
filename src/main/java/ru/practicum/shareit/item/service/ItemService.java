@@ -1,11 +1,14 @@
-package ru.practicum.shareit.item;
+package ru.practicum.shareit.item.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exceptions.NotFoundException;
 import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.item.mapper.ItemMapper;
 import ru.practicum.shareit.item.model.Item;
-import ru.practicum.shareit.user.UserRepository;
+import ru.practicum.shareit.item.repository.ItemRepository;
+import ru.practicum.shareit.user.model.User;
+import ru.practicum.shareit.user.repository.UserRepository;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -13,44 +16,50 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class ItemService {
+
     private final ItemRepository itemRepository;
     private final UserRepository userRepository;
     private final ItemMapper itemMapper;
 
     public ItemDto create(Long userId, ItemDto itemDto) {
-        userRepository.findById(userId)
+        User owner = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("User not found"));
 
-        Item item = itemMapper.toItem(itemDto, userId);
+        Item item = itemMapper.toEntity(itemDto);
+        item.setOwner(owner);
+
         return itemMapper.toDto(itemRepository.save(item));
     }
 
     public ItemDto update(Long userId, Long itemId, ItemDto itemDto) {
         Item item = itemRepository.findById(itemId)
-                .orElseThrow(() -> new NotFoundException("Вещь не найдена"));
+                .orElseThrow(() -> new NotFoundException("Item not found"));
 
-        if (!item.getOwnerId().equals(userId)) {
-            throw new NotFoundException("Редактировать может только владелец");
+        if (!item.getOwner().getId().equals(userId)) {
+            throw new NotFoundException("User is not item owner");
         }
 
-        if (itemDto.getName() != null && !itemDto.getName().isBlank()) item.setName(itemDto.getName());
-        if (itemDto.getDescription() != null && !itemDto.getDescription().isBlank()) item.setDescription(itemDto.getDescription());
-        if (itemDto.getAvailable() != null) item.setAvailable(itemDto.getAvailable());
+        if (itemDto.getName() != null) {
+            item.setName(itemDto.getName());
+        }
+        if (itemDto.getDescription() != null) {
+            item.setDescription(itemDto.getDescription());
+        }
+        if (itemDto.getAvailable() != null) {
+            item.setAvailable(itemDto.getAvailable());
+        }
 
-        return itemMapper.toDto(itemRepository.update(item));
+        return itemMapper.toDto(itemRepository.save(item));
     }
 
     public ItemDto getById(Long itemId) {
-        Item item = itemRepository.findById(itemId)
+        return itemRepository.findById(itemId)
+                .map(itemMapper::toDto)
                 .orElseThrow(() -> new NotFoundException("Item not found"));
-        return itemMapper.toDto(item);
     }
 
     public List<ItemDto> getAllByOwner(Long userId) {
-        userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException("User not found"));
-
-        return itemRepository.findAllByOwnerId(userId).stream()
+        return itemRepository.findAllByOwner_Id(userId).stream()
                 .map(itemMapper::toDto)
                 .collect(Collectors.toList());
     }

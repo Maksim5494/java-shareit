@@ -1,11 +1,13 @@
-package ru.practicum.shareit.user;
+package ru.practicum.shareit.user.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exceptions.ConflictException;
 import ru.practicum.shareit.exceptions.NotFoundException;
 import ru.practicum.shareit.user.dto.UserDto;
+import ru.practicum.shareit.user.mapper.UserMapper;
 import ru.practicum.shareit.user.model.User;
+import ru.practicum.shareit.user.repository.UserRepository;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -13,6 +15,7 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class UserService {
+
     private final UserRepository userRepository;
     private final UserMapper userMapper;
 
@@ -39,8 +42,7 @@ public class UserService {
             user.setEmail(userDto.getEmail());
         }
 
-        userRepository.update(user);
-        return userMapper.toDto(user);
+        return userMapper.toDto(userRepository.save(user));
     }
 
     public UserDto getById(Long userId) {
@@ -56,8 +58,9 @@ public class UserService {
     }
 
     public void delete(Long userId) {
-        userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException("User not found"));
+        if (!userRepository.existsById(userId)) {
+            throw new NotFoundException("User not found");
+        }
         userRepository.deleteById(userId);
     }
 }

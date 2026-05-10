@@ -1,17 +1,17 @@
 package ru.practicum.shareit.user.model;
 
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import lombok.*;
 import jakarta.persistence.*;
+import lombok.*;
 
 @Entity
 @Table(name = "users")
-@Getter @Setter
+@Getter
+@Setter
 @ToString
 @AllArgsConstructor
 @NoArgsConstructor
 public class User {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -19,8 +19,6 @@ public class User {
     @Column(name = "name", nullable = false)
     private String name;
 
-    @Email
-    @NotBlank
     @Column(name = "email", nullable = false, unique = true)
     private String email;
 }
