@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import ru.practicum.shareit.item.model.Item;
 
+import java.util.Collection;
 import java.util.List;
 
 public interface ItemRepository extends JpaRepository<Item, Long> {
@@ -12,6 +13,9 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
     List<Item> findAllByOwner_IdOrderByIdAsc(Long ownerId);
 
     List<Item> findAllByRequestId(Long requestId);
+
+    List<Item> findAllByRequestIdIn(Collection<Long> requestIds);
+
 
     @Query("select i from Item i " +
             "where i.available = true " +

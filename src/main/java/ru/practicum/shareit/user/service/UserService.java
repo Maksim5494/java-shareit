@@ -1,66 +1,18 @@
 package ru.practicum.shareit.user.service;
 
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-import ru.practicum.shareit.exceptions.ConflictException;
-import ru.practicum.shareit.exceptions.NotFoundException;
 import ru.practicum.shareit.user.dto.UserDto;
-import ru.practicum.shareit.user.mapper.UserMapper;
-import ru.practicum.shareit.user.model.User;
-import ru.practicum.shareit.user.repository.UserRepository;
-
 import java.util.List;
-import java.util.stream.Collectors;
 
-@Service
-@RequiredArgsConstructor
-public class UserService {
+public interface UserService {
 
-    private final UserRepository userRepository;
-    private final UserMapper userMapper;
+    UserDto create(UserDto userDto);
 
-    public UserDto create(UserDto userDto) {
-        if (userRepository.existsByEmail(userDto.getEmail())) {
-            throw new ConflictException("Email already exists");
-        }
-        User user = userMapper.toUser(userDto);
-        return userMapper.toDto(userRepository.save(user));
-    }
+    UserDto update(Long userId, UserDto userDto);
 
-    public UserDto update(Long userId, UserDto userDto) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException("User not found"));
+    UserDto getById(Long userId);
 
-        if (userDto.getName() != null) {
-            user.setName(userDto.getName());
-        }
+    List<UserDto> getAll();
 
-        if (userDto.getEmail() != null) {
-            if (userRepository.existsByEmailAndIdNot(userDto.getEmail(), userId)) {
-                throw new ConflictException("Email already exists");
-            }
-            user.setEmail(userDto.getEmail());
-        }
+    void delete(Long userId);
 
-        return userMapper.toDto(userRepository.save(user));
-    }
-
-    public UserDto getById(Long userId) {
-        return userRepository.findById(userId)
-                .map(userMapper::toDto)
-                .orElseThrow(() -> new NotFoundException("User not found"));
-    }
-
-    public List<UserDto> getAll() {
-        return userRepository.findAll().stream()
-                .map(userMapper::toDto)
-                .collect(Collectors.toList());
-    }
-
-    public void delete(Long userId) {
-        if (!userRepository.existsById(userId)) {
-            throw new NotFoundException("User not found");
-        }
-        userRepository.deleteById(userId);
-    }
 }
