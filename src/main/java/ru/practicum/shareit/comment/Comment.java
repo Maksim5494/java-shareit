@@ -18,7 +18,7 @@ public class Comment {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, length = 512) // Текст комментария часто бывает длинным
+    @Column(nullable = false, length = 512)
     private String text;
 
     @ManyToOne(fetch = FetchType.LAZY)

@@ -1,9 +1,11 @@
 package ru.practicum.shareit.item.dto;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 import lombok.Data;
+import ru.practicum.shareit.booking.dto.BookingShortDto;
 import ru.practicum.shareit.comment.CommentDto;
 
 import java.util.List;
@@ -26,8 +28,12 @@ public class ItemDto {
     private Long requestId;
     private Long ownerId;
 
-    private Long lastBookingId;
-    private Long nextBookingId;
+    @JsonInclude(JsonInclude.Include.ALWAYS)
+    private BookingShortDto lastBooking;
+
+    @JsonInclude(JsonInclude.Include.ALWAYS)
+    private BookingShortDto nextBooking;
+
     private List<CommentDto> comments;
 
     public interface Create {}

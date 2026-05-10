@@ -19,7 +19,9 @@ import java.util.List;
 public class ItemController {
 
     private static final String USER_HEADER = "X-Sharer-User-Id";
+
     private final ItemService itemService;
+    private final CommentService commentService;
 
     @PostMapping
     public ItemDto create(@RequestHeader(USER_HEADER) Long userId,
@@ -35,8 +37,9 @@ public class ItemController {
     }
 
     @GetMapping("/{itemId}")
-    public ItemDto getById(@PathVariable Long itemId) {
-        return itemService.getById(itemId);
+    public ItemDto getById(@RequestHeader(USER_HEADER) Long userId,
+                           @PathVariable Long itemId) {
+        return itemService.getById(itemId, userId);
     }
 
     @GetMapping
@@ -48,8 +51,6 @@ public class ItemController {
     public List<ItemDto> search(@RequestParam String text) {
         return itemService.search(text);
     }
-
-    private final CommentService commentService;
 
     @PostMapping("/{itemId}/comment")
     public CommentDto addComment(@RequestHeader("X-Sharer-User-Id") Long userId,

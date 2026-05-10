@@ -17,6 +17,7 @@ import ru.practicum.shareit.user.repository.UserRepository;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -129,17 +130,16 @@ public class BookingServiceImpl implements BookingService {
         return bookings.stream().map(BookingMapper::toDto).toList();
     }
 
-    @Override
     public List<BookingDto> getByOwner(Long userId, String state) {
         userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException("Пользователь не найден"));
+                .orElseThrow(() -> new NotFoundException("User not found"));
 
         LocalDateTime now = LocalDateTime.now();
         List<Booking> bookings;
 
         switch (state.toUpperCase()) {
             case "ALL":
-                bookings = bookingRepository.findAllByItemOwnerIdOrderByStartDesc(userId);
+                bookings = bookingRepository.findAllByItem_Owner_IdOrderByStartDesc(userId);
                 break;
             case "CURRENT":
                 bookings = bookingRepository.findAllByItem_Owner_IdAndStartBeforeAndEndAfterOrderByStartDesc(userId, now, now);
@@ -156,13 +156,9 @@ public class BookingServiceImpl implements BookingService {
             case "REJECTED":
                 bookings = bookingRepository.findAllByItem_Owner_IdAndStatusOrderByStartDesc(userId, BookingStatus.REJECTED);
                 break;
-            case "APPROVED":
-                bookings = bookingRepository.findAllByItem_Owner_IdAndStatusOrderByStartDesc(userId, BookingStatus.APPROVED);
-                break;
             default:
-                throw new ValidationException("Неверный state");
+                throw new ValidationException("Unknown state: " + state);
         }
-
-        return bookings.stream().map(BookingMapper::toDto).toList();
+        return bookings.stream().map(BookingMapper::toDto).collect(Collectors.toList());
     }
 }
