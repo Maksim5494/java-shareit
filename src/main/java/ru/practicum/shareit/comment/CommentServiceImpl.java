@@ -27,7 +27,6 @@ public class CommentServiceImpl implements CommentService {
     @Override
     @Transactional
     public CommentDto create(Long userId, Long itemId, String text) {
-
         if (text == null || text.isBlank()) {
             throw new ValidationException("Текст комментария не может быть пустым");
         }
@@ -38,8 +37,10 @@ public class CommentServiceImpl implements CommentService {
         Item item = itemRepository.findById(itemId)
                 .orElseThrow(() -> new NotFoundException("Вещь не найдена"));
 
+        LocalDateTime now = LocalDateTime.now();
+
         boolean exists = bookingRepository.existsByItem_IdAndBooker_IdAndStatusAndEndBefore(
-                itemId, userId, BookingStatus.APPROVED, LocalDateTime.now());
+                itemId, userId, BookingStatus.APPROVED, now);
 
         if (!exists) {
             throw new ValidationException("Вы не можете оставить отзыв: аренда не завершена или не существует");
@@ -49,10 +50,9 @@ public class CommentServiceImpl implements CommentService {
                 .text(text)
                 .item(item)
                 .author(author)
-                .created(LocalDateTime.now())
+                .created(now)
                 .build();
 
-        comment = commentRepository.save(comment);
-        return commentMapper.toDto(comment);
+        return commentMapper.toDto(commentRepository.save(comment));
     }
 }
