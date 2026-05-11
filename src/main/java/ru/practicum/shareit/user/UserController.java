@@ -1,4 +1,4 @@
-package ru.practicum.shareit.user;
+/*package ru.practicum.shareit.user;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
@@ -39,4 +39,4 @@ public class UserController {
     public void delete(@PathVariable Long userId) {
         userService.delete(userId);
     }
-}
+}*/

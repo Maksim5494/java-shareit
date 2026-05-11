@@ -1,4 +1,4 @@
-package ru.practicum.shareit.user;
+/*package ru.practicum.shareit.user;
 
 import org.springframework.stereotype.Repository;
 import ru.practicum.shareit.user.model.User;
@@ -50,4 +50,4 @@ public class UserRepositoryImpl implements UserRepository {
                 .anyMatch(user -> user.getEmail().equalsIgnoreCase(email)
                         && !user.getId().equals(id));
     }
-}
+}*/

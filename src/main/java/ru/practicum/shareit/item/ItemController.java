@@ -1,4 +1,4 @@
-package ru.practicum.shareit.item;
+/*package ru.practicum.shareit.item;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -41,4 +41,4 @@ public class ItemController {
     public List<ItemDto> search(@RequestParam String text) {
         return itemService.search(text);
     }
-}
+}*/
