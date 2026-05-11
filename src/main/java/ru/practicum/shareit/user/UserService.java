@@ -1,4 +1,4 @@
-package ru.practicum.shareit.user;
+/*package ru.practicum.shareit.user;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -60,4 +60,4 @@ public class UserService {
                 .orElseThrow(() -> new NotFoundException("User not found"));
         userRepository.deleteById(userId);
     }
-}
+}*/

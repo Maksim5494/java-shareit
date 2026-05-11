@@ -1,4 +1,4 @@
-package ru.practicum.shareit.user;
+/*package ru.practicum.shareit.user;
 
 import org.springframework.stereotype.Component;
 import ru.practicum.shareit.user.dto.UserDto;
@@ -15,4 +15,4 @@ public class UserMapper {
         if (dto == null) return null;
         return new User(dto.getId(), dto.getName(), dto.getEmail());
     }
-}
+}*/

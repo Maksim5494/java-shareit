@@ -1,4 +1,4 @@
-package ru.practicum.shareit.item;
+/*package ru.practicum.shareit.item;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -64,4 +64,4 @@ public class ItemService {
                 .map(itemMapper::toDto)
                 .collect(Collectors.toList());
     }
-}
+}*/

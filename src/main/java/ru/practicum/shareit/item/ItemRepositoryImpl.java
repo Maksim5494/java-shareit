@@ -1,4 +1,4 @@
-package ru.practicum.shareit.item;
+/*package ru.practicum.shareit.item;
 
 import org.springframework.stereotype.Repository;
 import ru.practicum.shareit.item.model.Item;
@@ -54,4 +54,4 @@ public class ItemRepositoryImpl implements ItemRepository {
                 })
                 .collect(Collectors.toList());
     }
-}
+}*/
