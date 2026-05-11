@@ -21,7 +21,7 @@ public class BookingMapper {
                 .build();
     }
 
-    public static Booking toEntity(BookingDto dto) {
+    public static Booking toBooking(BookingDto dto) {
         return Booking.builder()
                 .id(dto.getId())
                 .start(dto.getStart())

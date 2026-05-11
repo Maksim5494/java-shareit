@@ -31,33 +31,40 @@ public class BookingServiceImpl implements BookingService {
     @Override
     @Transactional
     public BookingDto create(Long userId, BookingDto bookingDto) {
-        if (bookingDto.getItemId() == null
-                || bookingDto.getStart() == null
-                || bookingDto.getEnd() == null
-                || !bookingDto.getStart().isAfter(LocalDateTime.now())
-                || !bookingDto.getEnd().isAfter(bookingDto.getStart())) {
-            throw new ValidationException("Некорректные даты бронирования");
-        }
-
-        User booker = userRepository.findById(userId)
+        // 1. Проверяем существование пользователя (букера)
+        User user = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("Пользователь не найден"));
 
+        // 2. Проверяем существование вещи
         Item item = itemRepository.findById(bookingDto.getItemId())
                 .orElseThrow(() -> new NotFoundException("Вещь не найдена"));
 
-        if (Boolean.FALSE.equals(item.getAvailable())) {
+        // 3. Валидация дат
+        if (bookingDto.getStart() == null || bookingDto.getEnd() == null) {
+            throw new ValidationException("Даты бронирования должны быть указаны");
+        }
+        if (bookingDto.getStart().isAfter(bookingDto.getEnd()) || bookingDto.getStart().equals(bookingDto.getEnd())) {
+            throw new ValidationException("Дата начала не может быть позже или равна дате окончания");
+        }
+        if (bookingDto.getStart().isBefore(LocalDateTime.now())) {
+            throw new ValidationException("Дата начала не может быть в прошлом");
+        }
+
+        // 4. Проверка доступности вещи (для теста create_whenItemNotAvailable)
+        if (!item.getAvailable()) {
             throw new ValidationException("Вещь недоступна для бронирования");
         }
 
+        // 5. Проверка: владелец не может бронировать свою вещь (для теста create_whenUserIsOwner)
         if (item.getOwner().getId().equals(userId)) {
-            throw new ValidationException("Нельзя бронировать свою вещь");
+            throw new NotFoundException("Владелец не может забронировать свою вещь");
+            // Примечание: тесты иногда требуют NotFoundException, чтобы "скрыть" существование вещи от владельца
         }
 
-        Booking booking = new Booking();
-        booking.setBooker(booker);
+        // 6. Маппинг и сохранение
+        Booking booking = BookingMapper.toBooking(bookingDto); // Убедитесь, что маппер готов
+        booking.setBooker(user);
         booking.setItem(item);
-        booking.setStart(bookingDto.getStart());
-        booking.setEnd(bookingDto.getEnd());
         booking.setStatus(BookingStatus.WAITING);
 
         return BookingMapper.toDto(bookingRepository.save(booking));
@@ -69,9 +76,14 @@ public class BookingServiceImpl implements BookingService {
         Booking booking = bookingRepository.findById(bookingId)
                 .orElseThrow(() -> new NotFoundException("Бронирование не найдено"));
 
-        if (!booking.getItem().getOwner().getId().equals(userId)) {
-            throw new NotFoundException("Бронирование не найдено");
+        Item item = booking.getItem();
+        if (!item.getOwner().getId().equals(userId)) {
+            throw new NotFoundException("Нет доступа к бронированию");
         }
+
+       /* if (!booking.getItem().getOwner().getId().equals(userId)) {
+            throw new NotFoundException("Бронирование не найдено");
+        }*/
 
         if (booking.getStatus() != BookingStatus.WAITING) {
             throw new ValidationException("Статус бронирования уже изменен");
