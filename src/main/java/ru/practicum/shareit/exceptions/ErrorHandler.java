@@ -38,7 +38,13 @@ public class ErrorHandler {
 
     @ExceptionHandler(Exception.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public ErrorResponse handleThrowable(final Throwable e) {
+    public ErrorResponse handleThrowable(final Exception e) {
         return new ErrorResponse("Произошла непредвиденная ошибка.");
+    }
+
+    @ExceptionHandler(jakarta.validation.ConstraintViolationException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleConstraintViolation(jakarta.validation.ConstraintViolationException e) {
+        return new ErrorResponse("Некорректный запрос");
     }
 }

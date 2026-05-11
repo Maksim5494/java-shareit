@@ -10,16 +10,17 @@ import java.util.List;
 
 public interface ItemRepository extends JpaRepository<Item, Long> {
 
+    List<Item> findAllByOwner_Id(Long ownerId);
+
     List<Item> findAllByOwner_IdOrderByIdAsc(Long ownerId);
 
     List<Item> findAllByRequestId(Long requestId);
 
     List<Item> findAllByRequestIdIn(Collection<Long> requestIds);
 
-
     @Query("select i from Item i " +
             "where i.available = true " +
             "and (lower(i.name) like lower(concat('%', :text, '%')) " +
             "or lower(i.description) like lower(concat('%', :text, '%')))")
-    List<Item> searchAvailableByText(@Param("text") String text);
+    List<Item> search(@Param("text") String text);
 }

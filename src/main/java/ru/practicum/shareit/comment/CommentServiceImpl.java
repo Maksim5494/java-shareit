@@ -39,11 +39,13 @@ public class CommentServiceImpl implements CommentService {
 
         LocalDateTime now = LocalDateTime.now();
 
-        boolean exists = bookingRepository.existsByItem_IdAndBooker_IdAndStatusAndEndBefore(
-                itemId, userId, BookingStatus.APPROVED, now);
+        boolean canComment = bookingRepository
+                .findFirstByItem_IdAndStartBeforeAndStatusOrderByStartDesc(itemId, now, BookingStatus.APPROVED)
+                .filter(booking -> booking.getBooker().getId().equals(userId))
+                .isPresent();
 
-        if (!exists) {
-            throw new ValidationException("Вы не можете оставить отзыв: аренда не завершена или не существует");
+        if (!canComment) {
+            throw new ValidationException("Пользователь не может оставить комментарий без завершенного бронирования");
         }
 
         Comment comment = Comment.builder()

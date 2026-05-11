@@ -31,38 +31,38 @@ public class BookingServiceImpl implements BookingService {
     @Override
     @Transactional
     public BookingDto create(Long userId, BookingDto bookingDto) {
-        // 1. Проверяем существование пользователя (букера)
+
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("Пользователь не найден"));
 
-        // 2. Проверяем существование вещи
+        if (bookingDto.getItemId() == null) {
+            throw new ValidationException("itemId должен быть указан");
+        }
+
         Item item = itemRepository.findById(bookingDto.getItemId())
                 .orElseThrow(() -> new NotFoundException("Вещь не найдена"));
 
-        // 3. Валидация дат
         if (bookingDto.getStart() == null || bookingDto.getEnd() == null) {
             throw new ValidationException("Даты бронирования должны быть указаны");
         }
+
         if (bookingDto.getStart().isAfter(bookingDto.getEnd()) || bookingDto.getStart().equals(bookingDto.getEnd())) {
             throw new ValidationException("Дата начала не может быть позже или равна дате окончания");
         }
+
         if (bookingDto.getStart().isBefore(LocalDateTime.now())) {
             throw new ValidationException("Дата начала не может быть в прошлом");
         }
 
-        // 4. Проверка доступности вещи (для теста create_whenItemNotAvailable)
         if (!item.getAvailable()) {
             throw new ValidationException("Вещь недоступна для бронирования");
         }
 
-        // 5. Проверка: владелец не может бронировать свою вещь (для теста create_whenUserIsOwner)
         if (item.getOwner().getId().equals(userId)) {
             throw new NotFoundException("Владелец не может забронировать свою вещь");
-            // Примечание: тесты иногда требуют NotFoundException, чтобы "скрыть" существование вещи от владельца
         }
 
-        // 6. Маппинг и сохранение
-        Booking booking = BookingMapper.toBooking(bookingDto); // Убедитесь, что маппер готов
+        Booking booking = BookingMapper.toBooking(bookingDto);
         booking.setBooker(user);
         booking.setItem(item);
         booking.setStatus(BookingStatus.WAITING);
@@ -80,10 +80,6 @@ public class BookingServiceImpl implements BookingService {
         if (!item.getOwner().getId().equals(userId)) {
             throw new NotFoundException("Нет доступа к бронированию");
         }
-
-       /* if (!booking.getItem().getOwner().getId().equals(userId)) {
-            throw new NotFoundException("Бронирование не найдено");
-        }*/
 
         if (booking.getStatus() != BookingStatus.WAITING) {
             throw new ValidationException("Статус бронирования уже изменен");
@@ -136,7 +132,7 @@ public class BookingServiceImpl implements BookingService {
                 bookings = bookingRepository.findAllByBooker_IdAndStatusOrderByStartDesc(userId, BookingStatus.APPROVED);
                 break;
             default:
-                throw new ValidationException("Неверный state");
+                throw new ValidationException("Unknown state: " + state);
         }
 
         return bookings.stream().map(BookingMapper::toDto).toList();

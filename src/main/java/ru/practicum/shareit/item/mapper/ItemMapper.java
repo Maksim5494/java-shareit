@@ -8,6 +8,10 @@ import ru.practicum.shareit.item.model.Item;
 public class ItemMapper {
 
     public ItemDto toDto(Item item) {
+        if (item == null) {
+            return null;
+        }
+
         return ItemDto.builder()
                 .id(item.getId())
                 .name(item.getName())
@@ -19,6 +23,10 @@ public class ItemMapper {
     }
 
     public Item toEntity(ItemDto dto) {
+        if (dto == null) {
+            return null;
+        }
+
         return Item.builder()
                 .id(dto.getId())
                 .name(dto.getName())
